@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    metrics: influxdb
+  name: influxdb
+  namespace: jmeter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      metrics: influxdb
+  template:
+    metadata:
+      labels:
+        metrics: influxdb
+    spec:
+      containers:
+      - env:
+        - name: INIT_USERS
+          value: "true"
+        - name: INFLUXDB_USER_PASSWORD
+          value: "admin"
+        - name: INFLUXDB_USER
+          value: "admin"
+        - name: INFLUXDB_DB
+          value: "metrics"
+        - name: INFLUXDB_UDP_ENABLED
+          value: "true"
+        - name: INFLUXDB_UDP_BIND_ADDRESS
+          value: :8087
+        - name: INFLUXDB_UDP_DATABASE
+          value: udp
+        image: influxdb:1.8
+        imagePullPolicy: Always
+        name: influxdb
+        ports:
+        - containerPort: 8086
+          protocol: TCP
+        - containerPort: 8087
+          protocol: UDP
+        - containerPort: 8083
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/influxdb
+          name: data-dir
+      volumes:
+      - name: data-dir
+        persistentVolumeClaim:
+          claimName: jmeter-pvc
+  test: false
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jmeter-pvc
+  namespace: jmeter
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5G

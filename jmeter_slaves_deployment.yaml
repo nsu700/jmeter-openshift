@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    jmeter_mode: slaves
+  name: jmeter-slaves
+spec:
+  selector:
+    matchLabels:
+      jmeter_mode: slaves
+  template:
+    metadata:
+      labels:
+        jmeter_mode: slaves
+    spec:
+      containers:
+      - image: cloudssky/jmeter-slave
+        imagePullPolicy: Always
+        name: jmeter-slave
+        ports:
+        - containerPort: 50000
+          protocol: TCP
+        - containerPort: 1099
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

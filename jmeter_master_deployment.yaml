@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: jmeter-master
+    jmeter_mode: master
+  name: jmeter-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: jmeter-master
+  template:
+    metadata:
+      labels:
+        run: jmeter-master
+    spec:
+      containers:
+      - image: cloudssky/jmeter-master
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        imagePullPolicy: Always
+        name: jmeter-master
+        ports:
+        - containerPort: 60000
+          protocol: TCP
+        volumeMounts:
+          - name: loadtest
+            mountPath: /jmeter/load_test
+            subPath: "load_test"
+      volumes:
+      - name: loadtest
+        configMap:
+         name: jmeter-load-test
+        resources: {}
+
+
+
